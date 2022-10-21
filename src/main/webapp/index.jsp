@@ -8,16 +8,16 @@
 </head>
 <body bgcolor="Azure">
 <div align="center">
-           <a><b>Welcome to Flight Booking app</b></a>
+           <a><b>Welcome to Heavenly Express</b></a>
            <br>
            <br>
            <form action="getUser" method="post">
 
-           User-Name:<input type="text" name="userName"/>
+           User-Name:<input type="text" id="userName"/>
            <br>
            Password:<input type="password" name="password"/>
            <br>
-           <button onclick='window.location="/FlightBookingApp/getUser?userName="+document.getElementBy-name("userName").value'>Search</button>
+           <button onclick='window.location="/FlightBookingApp/getUser?userName="+document.getElementById("userName").value'>Login</button>
 <a href="register">register</a>
 <br>
 <a href="officer">Officer login</a>

@@ -23,4 +23,14 @@ public class UserImpl implements UserDAO {
         }
     }
 
+    public boolean insertValues(UserModel user) {
+        try {
+            userRepo.save(user);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+
 }

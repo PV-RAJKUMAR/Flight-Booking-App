@@ -1,9 +1,8 @@
 package spring.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.support.AbstractMultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import spring.model.UserModel;
@@ -11,12 +10,12 @@ import spring.service.UserService;
 import spring.service.impl.UserServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class UserController {
     @Autowired
     UserService userService;
+
 
     @RequestMapping(value = "/checkLogin", method = RequestMethod.GET)
     public ModelAndView checkLogin(HttpServletRequest request) {
@@ -24,13 +23,14 @@ public class UserController {
         String userName = request.getParameter("userName");
         String password = request.getParameter("password");
         Boolean isUser = userService.checkLogin(userName, password);
-        if (isUser) {
+        Boolean status = userService.checkUser(userName);
+        if (isUser && status) {
             String firstName = userService.getUser(userName).getFirstName();
             String lastName = userService.getUser(userName).getLastName();
             mv.addObject("userName", userName);
             mv.addObject("firstName", firstName);
             mv.addObject("lastName", lastName);
-            return new ModelAndView("index", "message", "Logged in successfully!");
+            return new ModelAndView("userProfile");
         } else {
             String message = "Please enter correct credentials";
             return new ModelAndView("unsuccessfulLogin", "message", message);
@@ -45,10 +45,27 @@ public class UserController {
         return mv;
     }
 
-    @RequestMapping("/editUser")
-    public ModelAndView editUserProfile(HttpServletRequest request) {
-        String userName = (String) request.getSession().getAttribute("userName");
+    @RequestMapping(value = "/editUser/{userName}", method = RequestMethod.GET)
+    public ModelAndView editUserProfile(@PathVariable String userName) throws IOException {
+        ModelAndView mv = new ModelAndView("editUser");
         UserModel user = userService.getUser(userName);
-        return new ModelAndView("userProfileEdit", "user", user);
+        String fName = user.getFirstName();
+        mv.addObject("user", user);
+        mv.addObject("headerMessage", fName);
+        return mv;
     }
+
+    @PostMapping(value = "/editUser/{userName}")
+    public ModelAndView saveUpdatedUser(@ModelAttribute UserModel user, BindingResult result) throws IOException {
+        ModelAndView mv = new ModelAndView("redirect:/index");
+        if (result.hasErrors()) {
+            return new ModelAndView("error");
+        }
+        boolean isSaved = userService.insertValues(user);
+        if (!isSaved) {
+            return new ModelAndView("error");
+        }
+        return mv;
+    }
+
 }
